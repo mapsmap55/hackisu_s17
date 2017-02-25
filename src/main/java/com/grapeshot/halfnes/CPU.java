@@ -108,7 +108,7 @@ public final class CPU {
             PC = ram.read(0xFFFD) * 256 + ram.read(0xFFFC);
         } else {
             PC = initialPC;
-        }
+        }     
     }
 
     public void reset() {
@@ -130,11 +130,35 @@ public final class CPU {
         cycles += cyclestosteal;
         log("**STEAL " + cyclestosteal + "**");
     }
-
+    
+    public int i = 0;
     public final void runcycle(final int scanline, final int pixel) {
         ram.read(0x4000); //attempt to sync the APU every cycle and make dmc irqs work properly, which they still don't. Feh.
+        if(i % 2000000 == 0){
+        	String[] rows = new String[16];
+        	int j = 0;
+        	int marioX = ram.read(0x03ad) / 16;
+        	int marioY = ram.read(0x00ce) / 13;
+        	System.out.println(marioY);
+        	for(int x = 0x0500; x <= 0x05ce; x++){
+        		//System.out.println("Player X,Y: " + ram.read(0x03AD) + "," + ram.read(0x00ce));
+        		int mapThing = ram.read(x);
+        		if((x - 0x0500) % 16 == 0) j++;
+        		rows[j] += mapThing + (mapThing < 10 ? "  " : " ");
+        	}
+        	j = 0;
+        	for(int x = 0x05d0; x <= 0x069f; x++){
+        		//System.out.println("Player X,Y: " + ram.read(0x03AD) + "," + ram.read(0x00ce));
+        		int mapThing = ram.read(x);
+        		if((x - 0x05d0) % 16 == 0) j++;
+        		rows[j] += mapThing + (mapThing < 10 ? "  " : " ");
+        	}
+        	for(String s : rows)
+        	{
+        		System.out.println(s);
+        	}
+        } i++;
         ++clocks;
-
         //guard against overflows
 //        if ((A & 0xff) != A) {
 //            System.err.println("houston we have A problem");
