@@ -120,8 +120,29 @@ public class Neuron
     {
       wtdAvg += weights[i] * inputs[i];
     }
-
+    
     return sigmoid(wtdAvg);
+  }
+
+  @Override
+  public String toString()
+  {
+    StringBuilder b = new StringBuilder();
+
+    b.append("{\"bias\":").append(bias).append(",\"inputCount\":").append(weights.length).append(",\"inputWeights\":[");
+
+    for (float w : weights)
+    {
+      b.append(w).append(",");
+    }
+
+    if (b.charAt(b.length() - 1) == ',')
+    {
+      b.setLength(b.length() - 1);
+    }
+    b.append("]}");
+
+    return b.toString();
   }
 
   /**
@@ -139,6 +160,8 @@ public class Neuron
   /**
    * An input neuron is a neuron which has a settable output. It achieves this
    * by setting the bias and having no inputs.
+   * 
+   * Will and AJ was here
    *
    */
   public static class InputNeuron extends Neuron
@@ -160,6 +183,17 @@ public class Neuron
 
     public float get()
     {
+      return this.bias;
+    }
+
+    @Override
+    public float calculate(float... inputs)
+    {
+      if (0 != inputs.length)
+      {
+        throw new IllegalArgumentException("Incorrect number of inputs: " + inputs.length);
+      }
+
       return this.bias;
     }
   }
