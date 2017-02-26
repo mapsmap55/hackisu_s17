@@ -38,8 +38,8 @@ public class Pair<A, B> implements Cloneable
    */
   public Pair(A first, B second)
   {
-    this.first = first;
-    this.second = second;
+    setFirst(first);
+    setSecond(second);
   }
 
   /**
