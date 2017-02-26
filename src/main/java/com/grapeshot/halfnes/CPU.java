@@ -59,6 +59,9 @@ public final class CPU {
     
     public float[][] updateNN()
     {
+    	if (ram.read(0x000e) == 11) {
+            reset();
+          }
     	float[][] map1 = new float[16][16];
     	float[][] map2 = new float[16][16];
     	for(int x = 0x0500; x <= 0x05ce; ){
