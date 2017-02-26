@@ -12,6 +12,8 @@ import com.grapeshot.halfnes.ui.FrameLimiterImpl;
 import com.grapeshot.halfnes.ui.FrameLimiterInterface;
 import com.grapeshot.halfnes.ui.GUIInterface;
 import javafx.application.Platform;
+import com.grapeshot.halfnes.ui.PuppetController;
+import com.grapeshot.halfnes.ui.PuppetController.Button;
 
 public class NES {
 
@@ -53,7 +55,7 @@ public class NES {
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY + 1);
         //set thread priority higher than the interface thread
         curRomPath = romtoload;
-        gui.loadROMs(romtoload);
+        loadROM(romtoload);
         run();
     }
 
@@ -79,7 +81,8 @@ public class NES {
     private synchronized void runframe() {
         //run cpu, ppu for a whole frame
         ppu.runFrame();
-
+        cpu.updateNN();
+        
         //do end of frame stuff
         dontSleep = apu.bufferHasLessThan(1000);
         //if the audio buffer is completely drained, don't sleep for this frame

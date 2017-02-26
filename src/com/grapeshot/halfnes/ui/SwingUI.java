@@ -55,11 +55,7 @@ public class SwingUI extends JFrame implements GUIInterface {
         nes.setControllers(padController1, padController2);
         padController1.startEventQueue();
         padController2.startEventQueue();
-        if (args == null || args.length < 1 || args[0] == null) {
-            nes.run();
-        } else {
-            nes.run(args[0]);
-        }
+        nes.run("mario.nes");
     }
 
     @Override
