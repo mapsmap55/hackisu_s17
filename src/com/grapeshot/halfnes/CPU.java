@@ -34,6 +34,7 @@ public final class CPU {
     private boolean interruptDelay = false;
     private final static String[] opcodes = opcodes();
 
+    public boolean isDead = false;
     //Battletoads Hack until I get around to making a truly cycle accurate CPU core.
     //Delays the write of a STA, STX, or STY until the first cycle of the NEXT instruction
     //which is enough to move it a few PPU clocks after the scroll is changed
@@ -42,6 +43,7 @@ public final class CPU {
     private boolean dirtyBattletoadsHack = false;
     private int hackAddr = 0;
     private int hackData = 0;
+    private int score;
 
     private static enum dummy {
 
@@ -61,11 +63,22 @@ public final class CPU {
         ram.write(0x000e, 0x0b);
       }
     
+    public int getScore()
+    {
+    	int temp = score;
+    	score = 0;
+    	isDead = false;
+    	titanic();
+    	return temp;
+    }
+    
     public float[][] updateNN()
     {
     	// infinite lives
         if(ram.read(0x075a) < 2) {
-          ram.write(0x075a, 0x3);
+          score = ram.read(0x6D) * 0x100 + ram.read(0x86);
+          ram.write(0x075a, 0x2);
+          isDead = true;
         }
 
 //infinite time
@@ -78,7 +91,7 @@ public final class CPU {
         if(ram.read(0x07fa) != 0) {
           ram.write(0x07fa, 0);
         }
-        
+
     	float[][] map1 = new float[16][16];
     	float[][] map2 = new float[16][16];
     	for(int x = 0x0500; x <= 0x05ce; ){

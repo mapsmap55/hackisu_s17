@@ -106,5 +106,18 @@ public class Util
 
       return arr;
     }
+    
+    public static float[] asSingleArray(float[][] items)
+    {
+    	float[] temp = new float[items.length * items[0].length];
+    	for(int i = 0; i < items.length; i++)
+    	{
+    		for(int x = 0; x < items[0].length; x++)
+    		{
+    			temp[i * items[0].length + x] = items[i][x];
+    		}
+    	}
+    	return temp;
+    }
   }
 }

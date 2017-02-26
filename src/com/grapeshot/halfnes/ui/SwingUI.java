@@ -10,8 +10,13 @@ import com.grapeshot.halfnes.PrefsSingleton;
 import com.grapeshot.halfnes.video.RGBRenderer;
 import com.grapeshot.halfnes.cheats.ActionReplay;
 import com.grapeshot.halfnes.cheats.ActionReplayGui;
+import com.grapeshot.halfnes.ui.PuppetController.Button;
 import com.grapeshot.halfnes.video.NTSCRenderer;
 import com.grapeshot.halfnes.video.Renderer;
+
+import hackisu_s17.neur.NeuralNet;
+import hackisu_s17.util.Util.ArrayUtils;
+
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -45,19 +50,75 @@ public class SwingUI extends JFrame implements GUIInterface {
     private GraphicsDevice gd;
     private int NES_HEIGHT, NES_WIDTH;
     private Renderer renderer;
-    private final ControllerImpl padController1, padController2;
+    PuppetController padController1;
+	private final ControllerImpl padController2;
 
     public SwingUI(String[] args) {
         nes = new NES(this);
         screenScaleFactor = PrefsSingleton.get().getInt("screenScaling", 2);
-        padController1 = new ControllerImpl(this, 0);
-        padController2 = new ControllerImpl(this, 1);
-        nes.setControllers(padController1, padController2);
-        padController1.startEventQueue();
+        padController1 = new PuppetController();
+        padController2 = new ControllerImpl(this, 0);
         padController2.startEventQueue();
-        nes.run("mario.nes");
+        nes.setControllers(padController1, padController2);
+        new Thread(() -> nes.run("../mario.nes")).start();
+        while(true)
+        {
+            padController1.pressButton(Button.A);
+            padController1.releaseButton(Button.A);
+            padController1.pressButton(Button.RIGHT);
+            try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+            padController1.releaseButton(Button.RIGHT);
+        }
     }
-
+    private int noInput = 0;
+    public int runSim(NeuralNet n)
+    {
+    	while(!nes.getCPU().isDead){
+    		//0 = Up 1 = Right 2 = Down 3 = A 4 = B
+    		float[] butts = n.calculate(ArrayUtils.asSingleArray(nes.getCPU().updateNN()));
+    		for(int i = 0; i < butts.length; i++)
+    		{
+    			botButtonPress(i, butts[i] > .5f);
+    		}
+    	}
+    	return nes.getCPU().getScore();
+    }
+    
+    boolean[] bottonTable = { false, false, false, false, false }; 
+    public void botButtonPress(int pos, boolean dir)
+    {
+    	if(bottonTable[pos] != dir){
+    		bottonTable[pos] = dir;
+    	switch(pos){
+    	case 0: 
+    		if(dir) padController1.pressButton(Button.UP);
+    		else padController1.releaseButton(Button.UP);
+    		break;
+    	case 1:
+    		if(dir) padController1.pressButton(Button.RIGHT);
+    		else padController1.releaseButton(Button.RIGHT);
+    		break;
+    	case 2:
+    		if(dir) padController1.pressButton(Button.DOWN);
+    		else padController1.releaseButton(Button.DOWN);
+    		break;
+    	case 3:
+    		if(dir) padController1.pressButton(Button.A);
+    		else padController1.releaseButton(Button.A);
+    		break;
+    	case 4:
+    		if(dir) padController1.pressButton(Button.B);
+    		else padController1.releaseButton(Button.B);
+    		break;
+    	}
+    }
+    }
+    
     @Override
     public NES getNes() {
         return nes;
@@ -476,8 +537,6 @@ public class SwingUI extends JFrame implements GUIInterface {
         final ControlsDialog dialog = new ControlsDialog(this);
         dialog.setVisible(true);
         if (dialog.okClicked()) {
-            padController1.setButtons();
-            padController2.setButtons();
         }
     }
 
@@ -570,8 +629,6 @@ public class SwingUI extends JFrame implements GUIInterface {
         private void close() {
             dispose();
             savewindowposition();
-            padController1.stopEventQueue();
-            padController2.stopEventQueue();
             nes.quit();
         }
 
