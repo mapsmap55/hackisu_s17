@@ -57,11 +57,28 @@ public final class CPU {
         }
     }
     
+    private void titanic() {
+        ram.write(0x000e, 0x0b);
+      }
+    
     public float[][] updateNN()
     {
-    	if (ram.read(0x000e) == 11) {
-            reset();
-          }
+    	// infinite lives
+        if(ram.read(0x075a) < 2) {
+          ram.write(0x075a, 0x3);
+        }
+
+//infinite time
+        if(ram.read(0x07f8) != 0) {
+          ram.write(0x07f8, 0);
+        }
+        if(ram.read(0x07f9) != 7) {
+          ram.write(0x07f9, 7);
+        }
+        if(ram.read(0x07fa) != 0) {
+          ram.write(0x07fa, 0);
+        }
+        
     	float[][] map1 = new float[16][16];
     	float[][] map2 = new float[16][16];
     	for(int x = 0x0500; x <= 0x05ce; ){
