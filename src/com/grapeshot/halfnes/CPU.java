@@ -63,6 +63,29 @@ public final class CPU {
         ram.write(0x000e, 0x0b);
       }
     
+ // get enemy locations relative to mario (not block)
+    private Point[] getEnemyPos() {
+      int marioX = ram.read(0x04ac);
+      int marioY = ram.read(0x04ad);
+        Point enemies[] = new Point[5];
+        if (ram.read(0x000f) == 1) {
+          enemies[0] = new Point(ram.read(0x04b0)-marioX, ram.read(0x04b1)-marioY);
+        }
+        if (ram.read(0x0010) == 1) {
+          enemies[1] = new Point(ram.read(0x04b4)-marioX, ram.read(0x04b5)-marioY);
+        }
+        if (ram.read(0x0011) == 1) {
+          enemies[2] = new Point(ram.read(0x04b8)-marioX, ram.read(0x04b9)-marioY);
+        }
+        if (ram.read(0x0012) == 1) {
+          enemies[3] = new Point(ram.read(0x04bc)-marioX, ram.read(0x04bd)-marioY);
+        }
+        if (ram.read(0x0013) == 1) {
+          enemies[4] = new Point(ram.read(0x04c0)-marioX, ram.read(0x04c1)-marioY);
+        }
+        return enemies;
+      }
+    
     public int getScore()
     {
     	int temp = score;
@@ -145,7 +168,15 @@ public final class CPU {
         	}
         }
         
-        //Point[] enimes = getEnemyPos();
+     // add enemies to console printing or whatever
+        Point[] enemies = getEnemyPos();
+        for (Point p : enemies) {
+          if (p != null) {
+            if(p.getY() / 16 < 5 && p.getX() / 16 < 8 && p.getY() / 16 > 0 && p.getX() / 16 > 0)
+              output[(int) (p.getX()/16)][(int) ((p.getY()/16)) + 3] = -1f;
+          }
+        }
+
     	for(int f = 0; f < 8; f++)
     	{
     		for(int l = 0; l < 8; l++)
@@ -167,25 +198,6 @@ public final class CPU {
     	return output;
     }
     
-    private Point[] getEnemyPos() {
-        Point enemies[] = new Point[5];
-        if (ram.read(0x000f) == 1) {
-          enemies[0] = new Point(ram.read(0x0087), ram.read(0x006e));
-        }
-        if (ram.read(0x0010) == 1) {
-          enemies[1] = new Point(ram.read(0x0088), ram.read(0x006f));
-        }
-        if (ram.read(0x0011) == 1) {
-          enemies[2] = new Point(ram.read(0x0089), ram.read(0x0070));
-        }
-        if (ram.read(0x0012) == 1) {
-          enemies[3] = new Point(ram.read(0x008a), ram.read(0x0071));
-        }
-        if (ram.read(0x0013) == 1) {
-          enemies[4] = new Point(ram.read(0x008b), ram.read(0x0072));
-        }
-        return enemies;
-      }
     
     public void startLog() {
         logging = true;

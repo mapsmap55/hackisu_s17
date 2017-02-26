@@ -50,30 +50,18 @@ public class SwingUI extends JFrame implements GUIInterface {
     private GraphicsDevice gd;
     private int NES_HEIGHT, NES_WIDTH;
     private Renderer renderer;
-    PuppetController padController1;
+    ControllerImpl padController1;
 	private final ControllerImpl padController2;
 
     public SwingUI(String[] args) {
         nes = new NES(this);
         screenScaleFactor = PrefsSingleton.get().getInt("screenScaling", 2);
-        padController1 = new PuppetController();
-        padController2 = new ControllerImpl(this, 0);
+        padController1 = new ControllerImpl(this, 0);
+        padController2 = new ControllerImpl(this, 1);
+        padController1.startEventQueue();
         padController2.startEventQueue();
         nes.setControllers(padController1, padController2);
         new Thread(() -> nes.run("../mario.nes")).start();
-        while(true)
-        {
-            padController1.pressButton(Button.A);
-            padController1.releaseButton(Button.A);
-            padController1.pressButton(Button.RIGHT);
-            try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-            padController1.releaseButton(Button.RIGHT);
-        }
     }
     private int noInput = 0;
     public int runSim(NeuralNet n)
@@ -83,41 +71,41 @@ public class SwingUI extends JFrame implements GUIInterface {
     		float[] butts = n.calculate(ArrayUtils.asSingleArray(nes.getCPU().updateNN()));
     		for(int i = 0; i < butts.length; i++)
     		{
-    			botButtonPress(i, butts[i] > .5f);
+    			//botButtonPress(i, butts[i] > .5f);
     		}
     	}
     	return nes.getCPU().getScore();
     }
     
-    boolean[] bottonTable = { false, false, false, false, false }; 
-    public void botButtonPress(int pos, boolean dir)
-    {
-    	if(bottonTable[pos] != dir){
-    		bottonTable[pos] = dir;
-    	switch(pos){
-    	case 0: 
-    		if(dir) padController1.pressButton(Button.UP);
-    		else padController1.releaseButton(Button.UP);
-    		break;
-    	case 1:
-    		if(dir) padController1.pressButton(Button.RIGHT);
-    		else padController1.releaseButton(Button.RIGHT);
-    		break;
-    	case 2:
-    		if(dir) padController1.pressButton(Button.DOWN);
-    		else padController1.releaseButton(Button.DOWN);
-    		break;
-    	case 3:
-    		if(dir) padController1.pressButton(Button.A);
-    		else padController1.releaseButton(Button.A);
-    		break;
-    	case 4:
-    		if(dir) padController1.pressButton(Button.B);
-    		else padController1.releaseButton(Button.B);
-    		break;
-    	}
-    }
-    }
+//    boolean[] bottonTable = { false, false, false, false, false }; 
+//    public void botButtonPress(int pos, boolean dir)
+//    {
+//    	if(bottonTable[pos] != dir){
+//    		bottonTable[pos] = dir;
+//    	switch(pos){
+//    	case 0: 
+//    		if(dir) padController1.pressButton(Button.UP);
+//    		else padController1.releaseButton(Button.UP);
+//    		break;
+//    	case 1:
+//    		if(dir) padController1.pressButton(Button.RIGHT);
+//    		else padController1.releaseButton(Button.RIGHT);
+//    		break;
+//    	case 2:
+//    		if(dir) padController1.pressButton(Button.DOWN);
+//    		else padController1.releaseButton(Button.DOWN);
+//    		break;
+//    	case 3:
+//    		if(dir) padController1.pressButton(Button.A);
+//    		else padController1.releaseButton(Button.A);
+//    		break;
+//    	case 4:
+//    		if(dir) padController1.pressButton(Button.B);
+//    		else padController1.releaseButton(Button.B);
+//    		break;
+//    	}
+//    }
+//    }
     
     @Override
     public NES getNes() {
