@@ -17,7 +17,7 @@ public class HeadlessNES {
     public static final int scale = 4;
     public static void main(String[] args) {
         BufferedImage bufferedImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB_PRE);
-        HeadlessUI ui = new HeadlessUI("src/test/resources/nestest/nestest.nes", true);
+        HeadlessUI ui = new HeadlessUI("../mario.nes", true);
 
         for (int i = 0; i < 100; i++) {
             ui.runFrame();

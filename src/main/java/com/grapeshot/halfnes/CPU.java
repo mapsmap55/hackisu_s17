@@ -4,12 +4,15 @@
  */
 package com.grapeshot.halfnes;
 
+import java.awt.Point;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
+import java.util.Hashtable;
 
 public final class CPU {
 
@@ -53,7 +56,104 @@ public final class CPU {
             startLog();
         }
     }
-
+    
+    public float[][] updateNN()
+    {
+    	float[][] map1 = new float[16][16];
+    	float[][] map2 = new float[16][16];
+    	for(int x = 0x0500; x <= 0x05ce; ){
+    		for (int c = 0; c < 16; ++c, ++x)
+    		{
+    			map1[(x - 0x0500) / 16][c] = ram.read(x);
+    		}
+    	}
+    	for(int x = 0x05d0; x <= 0x069f;){
+    		for (int c = 0; c < 16; ++c, ++x)
+    		{
+    			map2[(x - 0x05d0) / 16][c] = ram.read(x);
+    		}
+    	}
+    	float[][] output = new float[8][8];
+    	int marioX = ram.read(0x6D) * 0x100 + ram.read(0x86);
+        int marioY = ram.read(0x03B8)+16;
+        int page = (marioX / 256) % 2;
+        int x = (int) Math.round((marioX % 256) / 16.0);
+        int y = ram.read(0x00ce) / 16;
+        for(int l = 0; l < 8; ++l)
+        {
+        	for(int m = 0; m < 8; ++m)
+        	{
+        		int tempY = x + l;
+        		int tempX = y + m - 4;
+        		if(tempX < 0 || tempX > 15 || tempY < 0 || tempY > 15 ){
+        			int tempXOverFlow = tempX < 0 ? 0 : tempX;
+        			int tempYOverFlow = tempY < 0 ? 0 : tempY;
+        			if(tempX > 15){
+        				tempXOverFlow = tempX - 15;
+        			}
+        			if(tempY > 15){
+        				tempYOverFlow = tempY - 15;
+        			}
+        			if(page == 0 ){
+            			output[l][m] = map2[tempXOverFlow][tempYOverFlow] != 0 ? 1 : 0;
+            			}else
+            			{
+            				output[l][m] = 0;
+            			}
+        		}
+        		else{
+        			if(page == 0 ){
+        			output[l][m] = map1[tempX][tempY] != 0 ? 1 : 0;
+        			}else
+        			{
+        				output[l][m] = map2[tempX][tempY] != 0 ? 1 : 0;
+        			}
+        		}
+        	}
+        }
+        
+        //Point[] enimes = getEnemyPos();
+    	for(int f = 0; f < 8; f++)
+    	{
+    		for(int l = 0; l < 8; l++)
+    		{
+    			if(f == 3 && l == 0)
+    			{
+    				System.out.print("O");
+    				continue;
+    			}
+    			switch((int)output[l][f]){
+    				case 1: System.out.print("X");
+    				break;
+    				case -1: System.out.print("#");
+    				default: System.out.print(" ");
+    			}
+    		}
+    		System.out.println();
+    	}
+    	return output;
+    }
+    
+    private Point[] getEnemyPos() {
+        Point enemies[] = new Point[5];
+        if (ram.read(0x000f) == 1) {
+          enemies[0] = new Point(ram.read(0x0087), ram.read(0x006e));
+        }
+        if (ram.read(0x0010) == 1) {
+          enemies[1] = new Point(ram.read(0x0088), ram.read(0x006f));
+        }
+        if (ram.read(0x0011) == 1) {
+          enemies[2] = new Point(ram.read(0x0089), ram.read(0x0070));
+        }
+        if (ram.read(0x0012) == 1) {
+          enemies[3] = new Point(ram.read(0x008a), ram.read(0x0071));
+        }
+        if (ram.read(0x0013) == 1) {
+          enemies[4] = new Point(ram.read(0x008b), ram.read(0x0072));
+        }
+        return enemies;
+      }
+    
     public void startLog() {
         logging = true;
         try {
@@ -134,30 +234,7 @@ public final class CPU {
     public int i = 0;
     public final void runcycle(final int scanline, final int pixel) {
         ram.read(0x4000); //attempt to sync the APU every cycle and make dmc irqs work properly, which they still don't. Feh.
-        if(i % 2000000 == 0){
-        	String[] rows = new String[16];
-        	int j = 0;
-        	int marioX = ram.read(0x03ad) / 16;
-        	int marioY = ram.read(0x00ce) / 13;
-        	System.out.println(marioY);
-        	for(int x = 0x0500; x <= 0x05ce; x++){
-        		//System.out.println("Player X,Y: " + ram.read(0x03AD) + "," + ram.read(0x00ce));
-        		int mapThing = ram.read(x);
-        		if((x - 0x0500) % 16 == 0) j++;
-        		rows[j] += mapThing + (mapThing < 10 ? "  " : " ");
-        	}
-        	j = 0;
-        	for(int x = 0x05d0; x <= 0x069f; x++){
-        		//System.out.println("Player X,Y: " + ram.read(0x03AD) + "," + ram.read(0x00ce));
-        		int mapThing = ram.read(x);
-        		if((x - 0x05d0) % 16 == 0) j++;
-        		rows[j] += mapThing + (mapThing < 10 ? "  " : " ");
-        	}
-        	for(String s : rows)
-        	{
-        		System.out.println(s);
-        	}
-        } i++;
+        	
         ++clocks;
         //guard against overflows
 //        if ((A & 0xff) != A) {
