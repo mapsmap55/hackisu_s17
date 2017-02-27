@@ -287,24 +287,40 @@ public class SwingUI extends JFrame implements GUIInterface {
         menus.add(help);
         
         JMenu tools = new JMenu("Tools");
+        JMenu world = new JMenu("Set World");
+        JMenu level = new JMenu("Set Level");
         
-        tools.add(item = new JMenu("Set World"));
+        tools.add(world);
         item.addActionListener(listener);
-        item.add(new JMenuItem("World 1"));
-        item.add(new JMenuItem("World 2"));
-        item.add(new JMenuItem("World 3"));
-        item.add(new JMenuItem("World 4"));
-        item.add(new JMenuItem("World 5"));
-        item.add(new JMenuItem("World 6"));
-        item.add(new JMenuItem("World 7"));
-        item.add(new JMenuItem("World 8"));
+        world.add(item = new JMenuItem("World 1"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 2"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 3"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 4"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 5"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 6"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 7"));
+        item.addActionListener(listener);
+        world.add(item = new JMenuItem("World 8"));
+        item.addActionListener(listener);
         
-        tools.add(item = new JMenu("Set Level"));
+        tools.add(level);
         item.addActionListener(listener);
-        item.add(new JMenuItem("Level 1"));
-        item.add(new JMenuItem("Level 2"));
-        item.add(new JMenuItem("Level 3"));
-        item.add(new JMenuItem("Level 4"));
+        level.add(item = new JMenuItem("Level 1"));
+        item.addActionListener(listener);
+        level.add(item = new JMenuItem("Level 2"));
+        item.addActionListener(listener);
+        level.add(item = new JMenuItem("Level 3"));
+        item.addActionListener(listener);
+        level.add(item = new JMenuItem("Level 4"));
+        item.addActionListener(listener);
+        level.add(item = new JMenuItem("Level 5"));
+        item.addActionListener(listener);
         
         tools.add(item = new JMenuItem("Clear Cheats"));
         item.addActionListener(listener);
@@ -328,7 +344,7 @@ public class SwingUI extends JFrame implements GUIInterface {
     public void setLevel(int level) {
     	final ActionReplay ar = nes.getActionReplay();
     	if (ar != null) {
-	    	ar.addMemoryPatch(new Patch(0x075f, level));
+	    	ar.addMemoryPatch(new Patch(0x0760, level));
 	    	ar.applyPatches();
     	} else {
             JOptionPane.showMessageDialog(this, "You have to load a game first.", "No ROM", JOptionPane.ERROR_MESSAGE);
@@ -659,10 +675,10 @@ public class SwingUI extends JFrame implements GUIInterface {
                 showControlsDialog();
             } else if (arg0.getActionCommand().equals("Cheat Codes")) {
                 showActionReplayDialog();
-            } else if (arg0.getActionCommand().equals("Set World")) {
-            	
-            } else if (arg0.getActionCommand().equals("Set Level")) {
-            	
+            } else if (arg0.getActionCommand().startsWith("World ")) {
+            	setWorld(Integer.parseInt(arg0.getActionCommand().charAt(arg0.getActionCommand().length()-1) + "") - 1);
+            } else if (arg0.getActionCommand().startsWith("Level ")) {
+            	setLevel(Integer.parseInt(arg0.getActionCommand().charAt(arg0.getActionCommand().length()-1) + "") - 1);
             } else if (arg0.getActionCommand().equals("Clear Cheats")) {
             	clearCheats();
             }
