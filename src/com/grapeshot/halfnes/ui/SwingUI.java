@@ -10,6 +10,7 @@ import com.grapeshot.halfnes.PrefsSingleton;
 import com.grapeshot.halfnes.video.RGBRenderer;
 import com.grapeshot.halfnes.cheats.ActionReplay;
 import com.grapeshot.halfnes.cheats.ActionReplayGui;
+import com.grapeshot.halfnes.cheats.Patch;
 import com.grapeshot.halfnes.ui.PuppetController.Button;
 import com.grapeshot.halfnes.video.NTSCRenderer;
 import com.grapeshot.halfnes.video.Renderer;
@@ -61,7 +62,7 @@ public class SwingUI extends JFrame implements GUIInterface {
         padController1.startEventQueue();
         padController2.startEventQueue();
         nes.setControllers(padController1, padController2);
-        new Thread(() -> nes.run("../mario.nes")).start();
+        new Thread(() -> nes.run("mario.nes")).start();
     }
     private int noInput = 0;
     public int runSim(NeuralNet n)
@@ -284,7 +285,63 @@ public class SwingUI extends JFrame implements GUIInterface {
         item.addActionListener(listener);
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
         menus.add(help);
+        
+        JMenu tools = new JMenu("Tools");
+        
+        tools.add(item = new JMenu("Set World"));
+        item.addActionListener(listener);
+        item.add(new JMenuItem("World 1"));
+        item.add(new JMenuItem("World 2"));
+        item.add(new JMenuItem("World 3"));
+        item.add(new JMenuItem("World 4"));
+        item.add(new JMenuItem("World 5"));
+        item.add(new JMenuItem("World 6"));
+        item.add(new JMenuItem("World 7"));
+        item.add(new JMenuItem("World 8"));
+        
+        tools.add(item = new JMenu("Set Level"));
+        item.addActionListener(listener);
+        item.add(new JMenuItem("Level 1"));
+        item.add(new JMenuItem("Level 2"));
+        item.add(new JMenuItem("Level 3"));
+        item.add(new JMenuItem("Level 4"));
+        
+        tools.add(item = new JMenuItem("Clear Cheats"));
+        item.addActionListener(listener);
+        item.setMnemonic(KeyEvent.VK_C);
+        
+        menus.add(tools);
+        
         this.setJMenuBar(menus);
+    }
+    
+    public void setWorld(int world) {
+    	final ActionReplay ar = nes.getActionReplay();
+	    if (ar != null) {
+	    	ar.addMemoryPatch(new Patch(0x075f, world));
+	    	ar.applyPatches();
+	    } else {
+            JOptionPane.showMessageDialog(this, "You have to load a game first.", "No ROM", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public void setLevel(int level) {
+    	final ActionReplay ar = nes.getActionReplay();
+    	if (ar != null) {
+	    	ar.addMemoryPatch(new Patch(0x075f, level));
+	    	ar.applyPatches();
+    	} else {
+            JOptionPane.showMessageDialog(this, "You have to load a game first.", "No ROM", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public void clearCheats() {
+    	final ActionReplay ar = nes.getActionReplay();
+    	if (ar != null) {
+    		ar.clear();
+    	} else {
+    		JOptionPane.showMessageDialog(this, "You have to load a game first.", "No ROM", JOptionPane.ERROR_MESSAGE);
+    	}
     }
 
     public void loadROM() {
@@ -602,6 +659,12 @@ public class SwingUI extends JFrame implements GUIInterface {
                 showControlsDialog();
             } else if (arg0.getActionCommand().equals("Cheat Codes")) {
                 showActionReplayDialog();
+            } else if (arg0.getActionCommand().equals("Set World")) {
+            	
+            } else if (arg0.getActionCommand().equals("Set Level")) {
+            	
+            } else if (arg0.getActionCommand().equals("Clear Cheats")) {
+            	clearCheats();
             }
         }
 
